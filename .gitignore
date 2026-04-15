@@ -1,0 +1,34 @@
+# Backend
+backend/target/
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/bin/
+backend/.DS_Store
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# General
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+.env
+.idea/
+.vscode/
+
+# Database
+db/postgres_data/
+redis_data/

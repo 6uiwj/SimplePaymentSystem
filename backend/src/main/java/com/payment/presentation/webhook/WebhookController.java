@@ -116,7 +116,7 @@ public class WebhookController {
                 case "PAYMENT_APPROVED" -> {
                     payment.markAsSuccess();
                     
-                    PaymentLog log = PaymentLog.createLogWithResponse(
+                    PaymentLog paymentLog = PaymentLog.createLogWithResponse(
                         payment.getId(),
                         payment.getPaymentKey(),
                         PaymentLog.PaymentLogEventType.WEBHOOK_RECEIVED,
@@ -124,7 +124,7 @@ public class WebhookController {
                         "200",
                         "SUCCESS"
                     );
-                    paymentLogRepository.save(log);
+                    paymentLogRepository.save(paymentLog);
                     
                     log.info("Webhook: 결제 승인 - paymentKey={}", payment.getPaymentKey());
                 }

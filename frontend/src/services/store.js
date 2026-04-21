@@ -1,17 +1,17 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 /**
  * Payment Store - Zustand
- * 
+ *
  * 역할:
  * - 전역 결제 상태 관리
  * - 컴포넌트 간 상태 공유
- * 
+ *
  * 이유:
  * - Redux/Context API보다 간단 (모던 접근)
  * - 필요한 상태만 구독 (성능 최적화)
  * - Boilerplate 코드 최소화
- * 
+ *
  * 상태:
  * - paymentKey: 현재 결제 고유 키
  * - paymentStatus: READY, REQUESTED, SUCCESS, FAIL
@@ -21,7 +21,7 @@ import { create } from 'zustand';
 export const usePaymentStore = create((set) => ({
   // State
   paymentKey: null,
-  paymentStatus: 'READY',
+  paymentStatus: "READY",
   paymentInfo: null,
   error: null,
   loading: false,
@@ -56,14 +56,14 @@ export const usePaymentStore = create((set) => ({
   setPaymentError: (error) =>
     set({
       error,
-      paymentStatus: 'FAIL',
+      paymentStatus: "FAIL",
     }),
 
   // 초기화
   resetPaymentState: () =>
     set({
       paymentKey: null,
-      paymentStatus: 'READY',
+      paymentStatus: "READY",
       paymentInfo: null,
       error: null,
       loading: false,
@@ -85,9 +85,9 @@ export const useUIStore = create((set) => ({
   closePaymentModal: () => set({ showPaymentModal: false }),
   openStatusModal: () => set({ showStatusModal: true }),
   closeStatusModal: () => set({ showStatusModal: false }),
-  
+
   // 알림 표시 (3초 자동 닫힘)
-  showNotification: (message, type = 'info') => {
+  showNotification: (message, type = "info") => {
     set({ notification: { message, type } });
     setTimeout(() => set({ notification: null }), 3000);
   },

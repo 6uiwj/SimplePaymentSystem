@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { paymentApi } from '../services/api';
-import { usePaymentStore, useUIStore } from '../services/store';
-import '../styles/payment.css';
+import { paymentApi } from '../../services/api';
+import { usePaymentStore, useUIStore } from '../../services/store';
+import '../../styles/payment.css';
 
 /**
  * PaymentForm 컴포넌트

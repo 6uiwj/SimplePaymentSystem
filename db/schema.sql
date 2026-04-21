@@ -45,21 +45,19 @@ CREATE TABLE payments (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
-    
-    -- 인덱스 (조회 성능)
-    UNIQUE(payment_key),
-    UNIQUE(idempotency_key),
-    UNIQUE(external_payment_id),
-    INDEX idx_payment_status (status),
-    INDEX idx_payment_order_id (order_id),
-    INDEX idx_payment_created_at (created_at DESC),
-    INDEX idx_payment_retry (status, retry_count),
+
+
     
     -- 제약조건 (데이터 무결성)
     CONSTRAINT chk_amount CHECK (amount > 0),
     CONSTRAINT chk_retry_count CHECK (retry_count >= 0 AND retry_count <= 3),
     CONSTRAINT chk_status CHECK (status IN ('READY', 'REQUESTED', 'SUCCESS', 'FAIL'))
 );
+
+CREATE INDEX idx_payment_status ON payments (status);
+CREATE INDEX idx_payment_order_id ON payments (order_id);
+CREATE INDEX idx_payment_created_at ON payments (created_at DESC);
+CREATE INDEX idx_payment_retry ON payments (status, retry_count);
 
 -- 2. PAYMENT_LOGS 테이블 (결제 이력 - Event Log)
 CREATE TABLE payment_logs (
@@ -87,12 +85,7 @@ CREATE TABLE payment_logs (
     
     -- 타임스탐프
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
-    -- 인덱스
-    INDEX idx_payment_log_payment_id (payment_id),
-    INDEX idx_payment_log_payment_key (payment_key),
-    INDEX idx_payment_log_event_type (event_type),
-    INDEX idx_payment_log_created_at (created_at DESC),
+
     
     -- 외래키 (선택적: 데이터 삭제 시 로그는 유지하고 싶으면 제거)
     -- FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL
@@ -102,6 +95,10 @@ CREATE TABLE payment_logs (
         ('CREATED', 'REQUESTED', 'SUCCESS', 'FAIL', 'RETRY', 'WEBHOOK_RECEIVED')
     )
 );
+CREATE INDEX idx_payment_log_payment_id ON payment_logs (payment_id);
+CREATE INDEX idx_payment_log_payment_key ON payment_logs (payment_key);
+CREATE INDEX idx_payment_log_event_type ON payment_logs (event_type);
+CREATE INDEX idx_payment_log_created_at ON payment_logs (created_at DESC);
 
 -- 3. IDEMPOTENCY_KEYS 테이블 (중복 결제 방지)
 CREATE TABLE idempotency_keys (
@@ -123,14 +120,14 @@ CREATE TABLE idempotency_keys (
     -- 만료 시간 (24시간 후 자동 만료)
     expires_at TIMESTAMP NOT NULL,
     
-    -- 인덱스
-    INDEX idx_idempotency_key (key),
-    INDEX idx_idempotency_expires_at (expires_at),
+
     
     -- 외래키
     FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_idempotency_key ON idempotency_keys (key);
+CREATE INDEX idx_idempotency_expires_at ON idempotency_keys (expires_at);
 -- 4. 뷰: 최근 결제 현황 (관리자 대시보드용)
 CREATE VIEW recent_payment_status AS
 SELECT 

@@ -10,6 +10,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 
 /**
  * Redis 설정
@@ -27,58 +28,45 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableCaching
 public class RedisConfig {
-    
+
     /**
-     * RedisTemplate 설정
-     * 문자열 기반 serializer 사용
-     * 
-     * 설정:
-     * - Key: StringRedisSerializer (문자열)
-     * - Value: StringRedisSerializer (문자열)
+     * 기본 RedisTemplate (문자열용)
      */
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, String> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        
-        // Key 직렬화
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        template.setKeySerializer(stringRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        
-        // Value 직렬화
-        template.setValueSerializer(stringRedisSerializer);
-        template.setHashValueSerializer(stringRedisSerializer);
-        
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+
+        template.setKeySerializer(stringSerializer);
+        template.setHashKeySerializer(stringSerializer);
+
+        template.setValueSerializer(stringSerializer);
+        template.setHashValueSerializer(stringSerializer);
+
         template.afterPropertiesSet();
         return template;
     }
-    
+
     /**
-     * 객체 직렬화용 RedisTemplate
-     * 필요시 복잡한 객체를 Redis에 저장할 때 사용
+     * 객체 저장용 RedisTemplate (추천)
      */
     @Bean
-    public <T> RedisTemplate<String, T> objectRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, T> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> objectRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-        
-        StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer<T> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.activateDefaultTyping(
-            objectMapper.getPolymorphicTypeFactory(),
-            ObjectMapper.DefaultTyping.NON_FINAL,
-            JsonTypeInfo.As.PROPERTY
-        );
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
-        
-        template.setKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(jackson2JsonRedisSerializer);
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);
-        
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+        GenericJackson2JsonRedisSerializer jsonSerializer =
+                new GenericJackson2JsonRedisSerializer();
+
+        template.setKeySerializer(stringSerializer);
+        template.setHashKeySerializer(stringSerializer);
+
+        template.setValueSerializer(jsonSerializer);
+        template.setHashValueSerializer(jsonSerializer);
+
         template.afterPropertiesSet();
         return template;
     }

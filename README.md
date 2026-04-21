@@ -27,21 +27,23 @@ Infrastructure Layer (Database, External API, Cache)
 
 ### 병렬 계층별 설명
 
-| 계층 | 역할 | 예시 |
-|------|------|------|
-| **Presentation** | HTTP 요청/응답 처리 | `PaymentController`, `WebhookController` |
-| **Application** | Use case 로직, 트랜잭션 | `PaymentService`, DTO |
-| **Domain** | 비즈니스 규칙 | `Payment`, `PaymentStatus`, Repository interface |
-| **Infrastructure** | 외부 시스템 연동 | `TossPaymentsGateway`, `RedisTemplate`, `JPA` |
+| 계층               | 역할                    | 예시                                             |
+| ------------------ | ----------------------- | ------------------------------------------------ |
+| **Presentation**   | HTTP 요청/응답 처리     | `PaymentController`, `WebhookController`         |
+| **Application**    | Use case 로직, 트랜잭션 | `PaymentService`, DTO                            |
+| **Domain**         | 비즈니스 규칙           | `Payment`, `PaymentStatus`, Repository interface |
+| **Infrastructure** | 외부 시스템 연동        | `TossPaymentsGateway`, `RedisTemplate`, `JPA`    |
 
 ### 왜 이 구조인가?
 
 **DDD (Domain-Driven Design)**
+
 - 비즈니스 속성이 도메인 엔티티에 집중
 - 도메인 로직이 명확하고 테스트 가능
 - 향후 비즈니스 변경에 유연하게 대응
 
 **4-Layered Architecture**
+
 - 각 계층이 독립적 → 기술 변경이 용이 (DB 변경, API 변경 등)
 - 단일 책임 원칙 준수
 - 테스트 용이
@@ -49,6 +51,7 @@ Infrastructure Layer (Database, External API, Cache)
 ## 🛠️ 기술 스택
 
 ### 백엔드
+
 - **Java 17** - 최신 안정 버전, 레코드 타입 사용 가능
 - **Spring Boot 4** - 자동 설정, 빠른 개발
 - **Spring Data JPA** - ORM, 데이터 영속성
@@ -58,6 +61,7 @@ Infrastructure Layer (Database, External API, Cache)
 - **Lombok** - 보일러플레이트 코드 감소
 
 ### 프론트엔드
+
 - **React 18** - 최신 UI 라이브러리
 - **Vite** - 빠른 개발 서버
 - **Zustand** - 글로벌 상태 관리 (Redux보다 간단)
@@ -65,6 +69,7 @@ Infrastructure Layer (Database, External API, Cache)
 - **React Router** - SPA 라우팅
 
 ### DevOps
+
 - **Docker** - 컨테이너화
 - **Docker Compose** - 멀티 컨테이너 오케스트레이션
 
@@ -151,6 +156,7 @@ npm run dev
 ## 📡 API 문서
 
 ### 결제 요청 생성
+
 ```
 POST /api/payments
 Content-Type: application/json
@@ -181,6 +187,7 @@ Content-Type: application/json
 ```
 
 ### 결제 상태 조회
+
 ```
 GET /api/payments/{paymentKey}
 
@@ -198,6 +205,7 @@ GET /api/payments/{paymentKey}
 ```
 
 ### 결제 이력 조회
+
 ```
 GET /api/payments/{paymentKey}/history
 
@@ -231,6 +239,7 @@ GET /api/payments/{paymentKey}/history
 **문제**: 네트워크 장애로 인한 재전송 시 중복 결제 발생
 
 **해결**:
+
 - 클라이언트: UUID로 생성한 `idempotencyKey` 전송
 - 서버: 같은 키로 재요청하면 기존 결과 반환
 - 24시간 후 자동 만료 (설정 가능)
@@ -246,6 +255,7 @@ POST /api/payments {idempotencyKey: "abc123"}  // paymentKey: "payment1" 반환 
 **문제**: 다중 인스턴스 환경에서 동시 요청 시 중복 결제 가능
 
 **해결**:
+
 - Redis의 SET NX 명령 사용
 - 첫 번째 요청이 락 획득 → 결제 진행
 - 두 번째 요청은 멱등성 키로 기존 결과 반환
@@ -273,6 +283,7 @@ READY → REQUESTED → SUCCESS
 ### 4. Webhook (비동기 결과 처리)
 
 **흐름**:
+
 1. 클라이언트 → 서버: 결제 요청
 2. 서버 → 토스페이먼츠: 결제 승인 요청
 3. 토스페이먼츠 → 서버: Webhook (결과 통지)
@@ -280,6 +291,7 @@ READY → REQUESTED → SUCCESS
 5. 서버 → 클라이언트: 폴링 또는 푸시로 결과 전달
 
 **서명 검증** (보안):
+
 ```
 토스페이먼츠 서명 = HMAC-SHA256(Webhook Payload, Secret Key)
 서버는 받은 서명과 계산한 서명 비교 → 위조 요청 방지
@@ -327,30 +339,35 @@ READY → REQUESTED → SUCCESS
 ## 🔒 보안 기능
 
 ### 1. 카드 정보 미저장
+
 - 우리 서버는 카드 정보를 받지 않음
 - 토스페이먼츠에서만 처리
 - PCI DSS 준수
 
 ### 2. Webhook 서명 검증
+
 - 모든 Webhook에 HMAC-SHA256 서명 포함
 - 서명 검증으로 위조 요청 방지
 
 ### 3. Idempotency Key
+
 - 중복 결제 방지
 - 네트워크 장애 시서도 안전
 
 ### 4. 분산 락
+
 - 다중 인스턴스에서의 데이터 일관성 보장
 
 ## 📊 모니터링
 
 ### 대시보드 조회
+
 ```bash
 # 최근 결제 현황 (뷰 사용)
 SELECT * FROM recent_payment_status ORDER BY created_at DESC;
 
 # 실패한 결제 중 재시도 가능한 것
-SELECT * FROM payments 
+SELECT * FROM payments
 WHERE status = 'FAIL' AND retry_count < 3
 ORDER BY updated_at ASC;
 

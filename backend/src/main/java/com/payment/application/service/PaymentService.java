@@ -127,13 +127,13 @@ public class PaymentService {
             idempotencyKeyRepository.save(idempotencyKey);
             
             // 5단계: PaymentLog 기록
-            PaymentLog log = PaymentLog.createLog(
+            PaymentLog paymentLog = PaymentLog.createLog(
                 savedPayment.getId(),
                 paymentKey,
                 PaymentLog.PaymentLogEventType.CREATED,
                 String.format("결제 생성: %s원 (%s)", request.amount(), request.productName())
             );
-            paymentLogRepository.save(log);
+            paymentLogRepository.save(paymentLog);
             
             log.info("결제 생성 완료: paymentKey={}, amount={}", paymentKey, request.amount());
             

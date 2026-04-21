@@ -90,13 +90,13 @@ public class PaymentLog {
             PaymentLogEventType eventType,
             String description) {
         
-        PaymentLog log = new PaymentLog();
-        log.paymentId = paymentId;
-        log.paymentKey = paymentKey;
-        log.eventType = eventType;
-        log.description = description;
-        log.createdAt = LocalDateTime.now();
-        return log;
+        PaymentLog paymentLog = new PaymentLog();
+        paymentLog.paymentId = paymentId;
+        paymentLog.paymentKey = paymentKey;
+        paymentLog.eventType = eventType;
+        paymentLog.description = description;
+        paymentLog.createdAt = LocalDateTime.now();
+        return paymentLog;
     }
     
     /**
@@ -110,10 +110,10 @@ public class PaymentLog {
             String responseCode,
             String responseMessage) {
         
-        PaymentLog log = createLog(paymentId, paymentKey, eventType, description);
-        log.responseCode = responseCode;
-        log.responseMessage = responseMessage;
-        return log;
+        PaymentLog paymentLog = createLog(paymentId, paymentKey, eventType, description);
+        paymentLog.responseCode = responseCode;
+        paymentLog.responseMessage = responseMessage;
+        return paymentLog;
     }
     
     /**

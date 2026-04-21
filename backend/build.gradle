@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.payment'
+version = '1.0.0'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    // 웹 요청 처리를 위한 Spring MVC 스타터
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 데이터베이스 접근을 위한 JPA 스타터. ORM 매핑과 CRUD 기능 제공
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // 보안 기능: 인증, 인가, CORS 등을 처리
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // 캐싱 지원. Redis 백엔드로 사용하기 위한 기반 제공
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // Redis 클라이언트. 동시성 제어와 캐싱에 사용
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // 검증 기능. @Valid 어노테이션과 함께 사용
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // PostgreSQL 드라이버
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // JSON 처리. 요청/응답 직렬화
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // HMAC SHA256 서명 검증을 위한 Apache Commons Codec
+    implementation 'commons-codec:commons-codec:1.15'
+
+    // UUID 생성과 유틸리티
+    implementation 'commons-lang:commons-lang:2.6'
+
+    // HTTP 클라이언트. 외부 결제 API 호출
+    implementation 'org.springframework:spring-web'
+
+    // Lombok: Getter, Setter, 생성자 자동 생성
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// 빌드 태스크
+tasks.named('build') {
+    doLast {
+        println "Build complete: ${jar.archiveFileName.get()}"
+    }
+}
+
+// 자신의 jar 파일 경로
+bootJar {
+    archiveFileName = 'payment-system-1.0.0.jar'
+}

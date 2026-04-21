@@ -1,25 +1,35 @@
-# Build Stage
-FROM maven:3.8.1-openjdk-17 AS builder
+# =========================
+# 1단계: 빌드
+# =========================
+FROM gradle:8.5-jdk17-alpine AS builder
 
 WORKDIR /build
 
-# Copy Maven 설정 및 소스
-COPY pom.xml .
-COPY src ./src
+# gradlew와 build.gradle 권한 설정
+COPY . .
+RUN chmod +x gradlew 2>/dev/null || true
 
-# Maven 빌드
-RUN mvn clean package -DskipTests
+# 의존성 캐싱
+RUN gradle dependencies -x test --no-daemon || true
 
-# Runtime Stage
-FROM openjdk:17-slim
+# Gradle 빌드 (verbose 모드 줄임)
+RUN gradle bootJar -x test --no-daemon --warn || gradle bootJar -x test --no-daemon
+
+# =========================
+# 2단계: 실행
+# =========================
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# 빌드 결과 복사
-COPY --from=builder /build/target/payment-system-1.0.0.jar app.jar
+# jar 복사
+COPY --from=builder /build/build/libs/*.jar app.jar
 
-# 포트 노출
+# 포트
 EXPOSE 8080
 
-# 애플리케이션 실행
+# 헬스체크 제거 (복잡성 줄임)
+CMD ["java", "-jar", "app.jar"]
+
+# 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]

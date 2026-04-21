@@ -1,5 +1,7 @@
 # Backend
 backend/target/
+backend/build/
+backend/.gradle/
 backend/.idea/
 backend/.vscode/
 backend/*.iml

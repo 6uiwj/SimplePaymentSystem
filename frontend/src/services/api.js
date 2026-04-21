@@ -1,26 +1,27 @@
-import axios from 'axios';
+import axios from "axios";
 
 /**
  * API 서비스
- * 
+ *
  * 역할:
  * - 모든 백엔드 API 호출을 중앙화
  * - 에러 처리
  * - 요청/응답 인터셉팅
- * 
+ *
  * 이유:
  * - API 변경 시 한 곳만 수정
  * - 공통 에러 처리 로직 분리
  * - 타임아웃, 재시도 등 정책 결정
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -33,7 +34,7 @@ apiClient.interceptors.request.use(
     // 필요시 토큰 추가: config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 /**
@@ -46,10 +47,10 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // 인증 오류: 로그인 페이지로 이동
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
     return Promise.reject(error.response?.data || error.message);
-  }
+  },
 );
 
 /**
@@ -61,7 +62,7 @@ export const paymentApi = {
    * POST /payments
    */
   initializePayment: async (request) => {
-    return apiClient.post('/payments', request);
+    return apiClient.post("/payments", request);
   },
 
   /**
